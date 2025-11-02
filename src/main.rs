@@ -1,5 +1,34 @@
+use lazy_static::lazy_static;
+use std::collections::HashMap;
 use std::fs;
 use std::io::{Cursor, Read};
+
+lazy_static! {
+    static ref BYTE_MAP: HashMap<&'static str, &'static str> = {
+        let mut m = HashMap::new();
+        m.insert("000", "AL");
+        m.insert("001", "CL");
+        m.insert("010", "DL");
+        m.insert("011", "BL");
+        m.insert("100", "AH");
+        m.insert("101", "CH");
+        m.insert("110", "DH");
+        m.insert("111", "BH");
+        m
+    };
+    static ref WORD_MAP: HashMap<&'static str, &'static str> = {
+        let mut m = HashMap::new();
+        m.insert("000", "AX");
+        m.insert("001", "CX");
+        m.insert("010", "DX");
+        m.insert("011", "BX");
+        m.insert("100", "AX");
+        m.insert("101", "CX");
+        m.insert("110", "DX");
+        m.insert("111", "BX");
+        m
+    };
+}
 
 /// Struct to hold the Instruction
 struct Instruction {
@@ -7,7 +36,9 @@ struct Instruction {
     operation: &'static str,
     /// D: 1-bit
     direction: &'static str,
-    /// W: 1-bit
+    /// W: 1-bit.
+    /// If W=1, we know that we are working with 2-byte registers (i.e., word-lengthed in 8086),
+    /// while if W=0, we know that we are working with 1-byte registers.
     word: &'static str,
     /// MOD: 2-bits
     mode: &'static str,
