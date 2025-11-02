@@ -4,28 +4,30 @@ use std::fs;
 use std::io::{Cursor, Read};
 
 lazy_static! {
-    static ref BYTE_MAP: HashMap<&'static str, &'static str> = {
+    static ref BYTE_MAP: HashMap<u8, &'static str> = {
         let mut m = HashMap::new();
-        m.insert("000", "AL");
-        m.insert("001", "CL");
-        m.insert("010", "DL");
-        m.insert("011", "BL");
-        m.insert("100", "AH");
-        m.insert("101", "CH");
-        m.insert("110", "DH");
-        m.insert("111", "BH");
+        m.insert(0b00000000, "AL");
+        m.insert(0b00001000, "CL");
+        m.insert(0b00010000, "DL");
+        m.insert(0b00011000, "BL");
+        m.insert(0b00100000, "AH");
+        m.insert(0b00101000, "CH");
+        m.insert(0b00110000, "DH");
+        m.insert(0b00111000, "BH");
+
         m
     };
-    static ref WORD_MAP: HashMap<&'static str, &'static str> = {
+    static ref WORD_MAP: HashMap<u8, &'static str> = {
         let mut m = HashMap::new();
-        m.insert("000", "AX");
-        m.insert("001", "CX");
-        m.insert("010", "DX");
-        m.insert("011", "BX");
-        m.insert("100", "AX");
-        m.insert("101", "CX");
-        m.insert("110", "DX");
-        m.insert("111", "BX");
+        m.insert(0b00000000, "AX");
+        m.insert(0b00001000, "CX");
+        m.insert(0b00010000, "DX");
+        m.insert(0b00011000, "BX");
+        m.insert(0b00100000, "SP");
+        m.insert(0b00101000, "BP");
+        m.insert(0b00110000, "SI");
+        m.insert(0b00111000, "DI");
+
         m
     };
 }
@@ -33,24 +35,23 @@ lazy_static! {
 /// Struct to hold the Instruction
 struct Instruction {
     /// Operation: 6-bits
-    operation: &'static str,
+    operation: u8,
     /// D: 1-bit
-    direction: &'static str,
+    direction: u8,
     /// W: 1-bit.
     /// If W=1, we know that we are working with 2-byte registers (i.e., word-lengthed in 8086),
     /// while if W=0, we know that we are working with 1-byte registers.
-    word: &'static str,
+    word: u8,
     /// MOD: 2-bits
-    mode: &'static str,
+    mode: u8,
     /// REG: 3-bits
-    reg1: &'static str,
+    reg1: u8,
     /// REG: 3-bits
-    reg2: &'static str,
+    reg2: u8,
 }
 
 /// Reads a bin file and returns the bit value
-/// into a string.
-fn read_bin(filename: &str) -> std::io::Result<String> {
+fn read_bin(filename: &str) -> std::io::Result<u16> {
     let data = fs::read(filename)?;
     let mut cursor = Cursor::new(&data);
 
@@ -72,14 +73,37 @@ fn read_bin(filename: &str) -> std::io::Result<String> {
     // a binary representation.
     let value = u16::from_be_bytes(word);
 
-    Ok(format!("{:16b}", value))
+    Ok(value)
 }
 
 fn main() -> std::io::Result<()> {
-    let file_name = "listing_0038_many_register_mov";
-    let bin_in_hexa = read_bin(file_name)?;
+    let file_name = "listing_0037_single_register_mov";
+    let bin_instruction = read_bin(file_name)?;
 
-    println!("Binary encoded: {}", bin_in_hexa);
+    // These are 16-bit values.
+    let operation = bin_instruction & 0b1111110000000000;
+    let direction = bin_instruction & 0b0000001000000000;
+    let word = bin_instruction & 0b0000000100000000;
+    // These are actually 8 bit values.
+    let mode = bin_instruction & 0b0000000011000000;
+    let reg1 = bin_instruction & 0b0000000000111000;
+    let reg2 = bin_instruction & 0b0000000000000111;
+
+    // operation, direction and word are 16 bit values because they are part of the first byte.
+    // So, we need to shift the bits in order to make it one byte.
+    // For example, if operation is 0b1000100000000000, shifting it 8 would be equal to 0b10001000.
+    // If direction is 0b0000001000000000, then shifting it to 8 would be 0b00000010.
+    // If word is 0b0000000100000000, then shifting it to 8 would be 0b00000001.
+    //
+    // If the REG value is 010, the u8 value of it would be 0b00010000.
+    let instruction = Instruction {
+        operation: ((operation >> 8) as u8),
+        direction: ((direction >> 8) as u8),
+        word: ((word >> 8) as u8),
+        mode: (mode as u8),
+        reg1: (reg1 as u8),
+        reg2: (reg2 as u8),
+    };
 
     Ok(())
 }
