@@ -4,7 +4,7 @@ use std::fs;
 use std::io::{Cursor, Read};
 
 lazy_static! {
-    static ref BYTE_MAP: HashMap<u8, &'static str> = {
+    static ref BYTE_MAP_REG1: HashMap<u8, &'static str> = {
         let mut m = HashMap::new();
         m.insert(0b00000000, "AL");
         m.insert(0b00001000, "CL");
@@ -17,7 +17,7 @@ lazy_static! {
 
         m
     };
-    static ref WORD_MAP: HashMap<u8, &'static str> = {
+    static ref WORD_MAP_REG1: HashMap<u8, &'static str> = {
         let mut m = HashMap::new();
         m.insert(0b00000000, "AX");
         m.insert(0b00001000, "CX");
@@ -30,24 +30,32 @@ lazy_static! {
 
         m
     };
-}
+    static ref BYTE_MAP_REG2: HashMap<u8, &'static str> = {
+        let mut m = HashMap::new();
+        m.insert(0b00000000, "AL");
+        m.insert(0b00000001, "CL");
+        m.insert(0b00000010, "DL");
+        m.insert(0b00000011, "BL");
+        m.insert(0b00000100, "AH");
+        m.insert(0b00000101, "CH");
+        m.insert(0b00110110, "DH");
+        m.insert(0b00110111, "BH");
 
-/// Struct to hold the Instruction
-struct Instruction {
-    /// Operation: 6-bits
-    operation: u8,
-    /// D: 1-bit
-    direction: u8,
-    /// W: 1-bit.
-    /// If W=1, we know that we are working with 2-byte registers (i.e., word-lengthed in 8086),
-    /// while if W=0, we know that we are working with 1-byte registers.
-    word: u8,
-    /// MOD: 2-bits
-    mode: u8,
-    /// REG: 3-bits
-    reg1: u8,
-    /// REG: 3-bits
-    reg2: u8,
+        m
+    };
+    static ref WORD_MAP_REG2: HashMap<u8, &'static str> = {
+        let mut m = HashMap::new();
+        m.insert(0b00000000, "AX");
+        m.insert(0b00000001, "CX");
+        m.insert(0b00000010, "DX");
+        m.insert(0b00000011, "BX");
+        m.insert(0b00000100, "SP");
+        m.insert(0b00100101, "BP");
+        m.insert(0b00000110, "SI");
+        m.insert(0b00000111, "DI");
+
+        m
+    };
 }
 
 /// Reads a bin file and returns the bit value
@@ -80,6 +88,8 @@ fn main() -> std::io::Result<()> {
     let file_name = "listing_0037_single_register_mov";
     let bin_instruction = read_bin(file_name)?;
 
+    println!("Instruction {:16b}", bin_instruction);
+
     // These are 16-bit values.
     let operation = bin_instruction & 0b1111110000000000;
     let direction = bin_instruction & 0b0000001000000000;
@@ -89,6 +99,13 @@ fn main() -> std::io::Result<()> {
     let reg1 = bin_instruction & 0b0000000000111000;
     let reg2 = bin_instruction & 0b0000000000000111;
 
+    let _ = (operation >> 8) as u8;
+    let _ = (direction >> 8) as u8;
+    let word_u8 = (word >> 8) as u8;
+    let _ = mode as u8;
+    let reg1_u8 = reg1 as u8;
+    let reg2_u8 = reg2 as u8;
+
     // operation, direction and word are 16 bit values because they are part of the first byte.
     // So, we need to shift the bits in order to make it one byte.
     // For example, if operation is 0b1000100000000000, shifting it 8 would be equal to 0b10001000.
@@ -96,14 +113,48 @@ fn main() -> std::io::Result<()> {
     // If word is 0b0000000100000000, then shifting it to 8 would be 0b00000001.
     //
     // If the REG value is 010, the u8 value of it would be 0b00010000.
-    let instruction = Instruction {
-        operation: ((operation >> 8) as u8),
-        direction: ((direction >> 8) as u8),
-        word: ((word >> 8) as u8),
-        mode: (mode as u8),
-        reg1: (reg1 as u8),
-        reg2: (reg2 as u8),
-    };
+
+    let mut src = String::new();
+    let mut dest = String::new();
+
+    println!("REG1 -> {:08b}, REG2 -> {:08b}", reg1_u8, reg2_u8);
+
+    if word_u8 == 0b00000001 {
+        // Use WORD_MAP to find what the registers are.
+        let val1 = WORD_MAP_REG1[&reg1_u8];
+        let val2 = WORD_MAP_REG2[&reg2_u8];
+
+        if direction == 0b00000010 {
+            // D = 1
+            // Then reg1 is the destination.
+            src = String::from(val2);
+            dest = String::from(val1);
+        } else {
+            // D = 0
+            // Then reg2 is the destination.
+            src = String::from(val1);
+            dest = String::from(val2);
+        }
+    } else if word_u8 == 0b00000000 {
+        // Use BYTE_MAP to find what the registers are.
+        let val1 = BYTE_MAP_REG1[&reg1_u8];
+        let val2 = BYTE_MAP_REG2[&reg2_u8];
+
+        if direction == 0b00000010 {
+            // D = 1
+            // Then reg1 is the destination.
+            src = String::from(val2);
+            dest = String::from(val1);
+        } else {
+            // D = 0
+            // Then reg2 is the destination.
+            src = String::from(val1);
+            dest = String::from(val2);
+        }
+    } else {
+        // Unknown value!
+    }
+    println!("MOV {dest},{src}");
 
     Ok(())
 }
