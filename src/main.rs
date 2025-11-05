@@ -77,6 +77,58 @@ fn read_bin(filename: &str) -> std::io::Result<u16> {
     Ok(value)
 }
 
+fn decode(operation: u8, direction: u8, word: u8, mode: u8, reg1: u8, reg2: u8) {
+    // operation, direction and word are 16 bit values because they are part of the first byte.
+    // So, we need to shift the bits in order to make it one byte.
+    // For example, if operation is 0b1000100000000000, shifting it 8 would be equal to 0b10001000.
+    // If direction is 0b0000001000000000, then shifting it to 8 would be 0b00000010.
+    // If word is 0b0000000100000000, then shifting it to 8 would be 0b00000001.
+    //
+    // If the REG value is 010, the u8 value of it would be 0b00010000.
+
+    let mut src = String::new();
+    let mut dest = String::new();
+
+    println!("REG1 -> {:08b}, REG2 -> {:08b}", reg1, reg2);
+
+    if word == WORD_BYTE {
+        // Use WORD_MAP to find what the registers are.
+        let val1 = WORD_MAP_REG[&reg1];
+        let val2 = WORD_MAP_REG[&reg2];
+
+        if direction == 0b00000010 {
+            // D = 1
+            // Then reg1 is the destination.
+            src = String::from(val2);
+            dest = String::from(val1);
+        } else {
+            // D = 0
+            // Then reg2 is the destination.
+            src = String::from(val1);
+            dest = String::from(val2);
+        }
+    } else if word == BYTE_BYTE {
+        // Use BYTE_MAP to find what the registers are.
+        let val1 = BYTE_MAP_REG[&reg1];
+        let val2 = BYTE_MAP_REG[&reg2;
+
+        if direction == 0b00000010 {
+            // D = 1
+            // Then reg1 is the destination.
+            src = String::from(val2);
+            dest = String::from(val1);
+        } else {
+            // D = 0
+            // Then reg2 is the destination.
+            src = String::from(val1);
+            dest = String::from(val2);
+        }
+    } else {
+        // Unknown value!
+    }
+    println!("MOV {dest},{src}");
+}
+
 fn main() -> std::io::Result<()> {
     let file_name = "listing_0037_single_register_mov";
     let bin_instruction = read_bin(file_name)?;
@@ -98,56 +150,6 @@ fn main() -> std::io::Result<()> {
     let _ = mode as u8;
     let reg1_u8 = reg1 as u8;
     let reg2_u8 = reg2 as u8;
-
-    // operation, direction and word are 16 bit values because they are part of the first byte.
-    // So, we need to shift the bits in order to make it one byte.
-    // For example, if operation is 0b1000100000000000, shifting it 8 would be equal to 0b10001000.
-    // If direction is 0b0000001000000000, then shifting it to 8 would be 0b00000010.
-    // If word is 0b0000000100000000, then shifting it to 8 would be 0b00000001.
-    //
-    // If the REG value is 010, the u8 value of it would be 0b00010000.
-
-    let mut src = String::new();
-    let mut dest = String::new();
-
-    println!("REG1 -> {:08b}, REG2 -> {:08b}", reg1_u8, reg2_u8);
-
-    if word_u8 == WORD_BYTE {
-        // Use WORD_MAP to find what the registers are.
-        let val1 = WORD_MAP_REG[&reg1_u8];
-        let val2 = WORD_MAP_REG[&reg2_u8];
-
-        if direction == 0b00000010 {
-            // D = 1
-            // Then reg1 is the destination.
-            src = String::from(val2);
-            dest = String::from(val1);
-        } else {
-            // D = 0
-            // Then reg2 is the destination.
-            src = String::from(val1);
-            dest = String::from(val2);
-        }
-    } else if word_u8 == BYTE_BYTE {
-        // Use BYTE_MAP to find what the registers are.
-        let val1 = BYTE_MAP_REG[&reg1_u8];
-        let val2 = BYTE_MAP_REG[&reg2_u8];
-
-        if direction == 0b00000010 {
-            // D = 1
-            // Then reg1 is the destination.
-            src = String::from(val2);
-            dest = String::from(val1);
-        } else {
-            // D = 0
-            // Then reg2 is the destination.
-            src = String::from(val1);
-            dest = String::from(val2);
-        }
-    } else {
-        // Unknown value!
-    }
-    println!("MOV {dest},{src}");
 
     Ok(())
 }
