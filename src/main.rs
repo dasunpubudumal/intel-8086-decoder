@@ -4,7 +4,7 @@ use std::fs;
 use std::io::{Cursor, Read};
 
 lazy_static! {
-    static ref BYTE_MAP_REG1: HashMap<u8, &'static str> = {
+    static ref BYTE_MAP_REG: HashMap<u8, &'static str> = {
         let mut m = HashMap::new();
         m.insert(0b00000000, "AL");
         m.insert(0b00001000, "CL");
@@ -14,24 +14,6 @@ lazy_static! {
         m.insert(0b00101000, "CH");
         m.insert(0b00110000, "DH");
         m.insert(0b00111000, "BH");
-
-        m
-    };
-    static ref WORD_MAP_REG1: HashMap<u8, &'static str> = {
-        let mut m = HashMap::new();
-        m.insert(0b00000000, "AX");
-        m.insert(0b00001000, "CX");
-        m.insert(0b00010000, "DX");
-        m.insert(0b00011000, "BX");
-        m.insert(0b00100000, "SP");
-        m.insert(0b00101000, "BP");
-        m.insert(0b00110000, "SI");
-        m.insert(0b00111000, "DI");
-
-        m
-    };
-    static ref BYTE_MAP_REG2: HashMap<u8, &'static str> = {
-        let mut m = HashMap::new();
         m.insert(0b00000000, "AL");
         m.insert(0b00000001, "CL");
         m.insert(0b00000010, "DL");
@@ -43,8 +25,16 @@ lazy_static! {
 
         m
     };
-    static ref WORD_MAP_REG2: HashMap<u8, &'static str> = {
+    static ref WORD_MAP_REG: HashMap<u8, &'static str> = {
         let mut m = HashMap::new();
+        m.insert(0b00000000, "AX");
+        m.insert(0b00001000, "CX");
+        m.insert(0b00010000, "DX");
+        m.insert(0b00011000, "BX");
+        m.insert(0b00100000, "SP");
+        m.insert(0b00101000, "BP");
+        m.insert(0b00110000, "SI");
+        m.insert(0b00111000, "DI");
         m.insert(0b00000000, "AX");
         m.insert(0b00000001, "CX");
         m.insert(0b00000010, "DX");
@@ -121,8 +111,8 @@ fn main() -> std::io::Result<()> {
 
     if word_u8 == 0b00000001 {
         // Use WORD_MAP to find what the registers are.
-        let val1 = WORD_MAP_REG1[&reg1_u8];
-        let val2 = WORD_MAP_REG2[&reg2_u8];
+        let val1 = WORD_MAP_REG[&reg1_u8];
+        let val2 = WORD_MAP_REG[&reg2_u8];
 
         if direction == 0b00000010 {
             // D = 1
@@ -137,8 +127,8 @@ fn main() -> std::io::Result<()> {
         }
     } else if word_u8 == 0b00000000 {
         // Use BYTE_MAP to find what the registers are.
-        let val1 = BYTE_MAP_REG1[&reg1_u8];
-        let val2 = BYTE_MAP_REG2[&reg2_u8];
+        let val1 = BYTE_MAP_REG[&reg1_u8];
+        let val2 = BYTE_MAP_REG[&reg2_u8];
 
         if direction == 0b00000010 {
             // D = 1
