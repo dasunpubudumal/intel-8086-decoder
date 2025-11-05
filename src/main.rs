@@ -3,6 +3,9 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::{Cursor, Read};
 
+const WORD_BYTE: u8 = 0b00000001;
+const BYTE_BYTE: u8 = 0b00000000;
+
 lazy_static! {
     static ref BYTE_MAP_REG: HashMap<u8, &'static str> = {
         let mut m = HashMap::new();
@@ -109,7 +112,7 @@ fn main() -> std::io::Result<()> {
 
     println!("REG1 -> {:08b}, REG2 -> {:08b}", reg1_u8, reg2_u8);
 
-    if word_u8 == 0b00000001 {
+    if word_u8 == WORD_BYTE {
         // Use WORD_MAP to find what the registers are.
         let val1 = WORD_MAP_REG[&reg1_u8];
         let val2 = WORD_MAP_REG[&reg2_u8];
@@ -125,7 +128,7 @@ fn main() -> std::io::Result<()> {
             src = String::from(val1);
             dest = String::from(val2);
         }
-    } else if word_u8 == 0b00000000 {
+    } else if word_u8 == BYTE_BYTE {
         // Use BYTE_MAP to find what the registers are.
         let val1 = BYTE_MAP_REG[&reg1_u8];
         let val2 = BYTE_MAP_REG[&reg2_u8];
