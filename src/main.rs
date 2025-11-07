@@ -81,8 +81,6 @@ fn decode(operation: u8, direction: u8, word: u8, mode: u8, reg1: u8, reg2: u8) 
     let mut src = String::new();
     let mut dest = String::new();
 
-    println!("REG1 -> {:08b}, REG2 -> {:08b}", reg1, reg2);
-
     if word == WORD_BYTE {
         // Use WORD_MAP to find what the registers are.
         let val1 = WORD_MAP_REG[&reg1];
@@ -121,36 +119,27 @@ fn decode(operation: u8, direction: u8, word: u8, mode: u8, reg1: u8, reg2: u8) 
     format!("MOV {dest},{src}")
 }
 
+/// Running the code in dev mode:
+/// `cargo run -- <file_name>`
 fn main() -> std::io::Result<()> {
-    let file_name = "listing_0037_single_register_mov";
+    let args: Vec<String> = std::env::args().collect();
+    let file_name = &args[1];
+
+    println!("File name: {file_name}");
+
     let bin_instructions = read_bin(file_name)?;
 
     for bin_instruction in bin_instructions {
-        println!("Instruction {:16b}", bin_instruction);
         // These are 16-bit values.
-        let operation = bin_instruction & 0b1111110000000000;
-        let direction = bin_instruction & 0b0000001000000000;
-        let word = bin_instruction & 0b0000000100000000;
-        // These are actually 8 bit values.
-        let mode = bin_instruction & 0b0000000011000000;
-        let reg1 = bin_instruction & 0b0000000000111000;
-        let reg2 = bin_instruction & 0b0000000000000111;
+        let operation = ((bin_instruction & 0b1111110000000000) >> 8) as u8;
+        let direction = ((bin_instruction & 0b0000001000000000) >> 8) as u8;
+        let word = ((bin_instruction & 0b0000000100000000) >> 8) as u8;
+        // These are actually 8 bit values (the first byte is 0).
+        let mode = ((bin_instruction & 0b0000000011000000) >> 8) as u8;
+        let reg1 = (bin_instruction & 0b0000000000111000) as u8;
+        let reg2 = (bin_instruction & 0b0000000000000111) as u8;
 
-        let operation_u8 = (operation >> 8) as u8;
-        let direction_u8 = (direction >> 8) as u8;
-        let word_u8 = (word >> 8) as u8;
-        let mode_u8 = mode as u8;
-        let reg1_u8 = reg1 as u8;
-        let reg2_u8 = reg2 as u8;
-
-        let decoded_instruction = decode(
-            operation_u8,
-            direction_u8,
-            word_u8,
-            mode_u8,
-            reg1_u8,
-            reg2_u8,
-        );
+        let decoded_instruction = decode(operation, direction, word, mode, reg1, reg2);
 
         println!("{decoded_instruction}");
     }
