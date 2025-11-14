@@ -153,12 +153,10 @@ fn main() -> std::io::Result<()> {
 
         let decoded_instruction = decode(operation, direction, word, mode, reg1, reg2);
 
-        // vector.push(decoded_instruction);
-
-        println!("{decoded_instruction}")
+        vector.push(format!("{}\n", decoded_instruction));
     }
 
-    // write_file(vector).expect("Error in writing file.");
+    write_file(vector).expect("Error in writing file.");
 
     Ok(())
 }
