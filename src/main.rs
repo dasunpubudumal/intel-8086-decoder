@@ -9,6 +9,8 @@ const WORD_BYTE: u8 = 0b00000001;
 const BYTE_BYTE: u8 = 0b00000000;
 
 lazy_static! {
+
+    // This is when the register is a byte register (not a word register.)
     static ref BYTE_MAP_REG: HashMap<u8, &'static str> = {
         let mut m = HashMap::new();
         m.insert(0b00000000, "AL");
@@ -29,6 +31,8 @@ lazy_static! {
 
         m
     };
+
+    // This is when the register is a word register (not a byte register)
     static ref WORD_MAP_REG: HashMap<u8, &'static str> = {
         let mut m = HashMap::new();
         m.insert(0b00000000, "AX");
@@ -137,7 +141,6 @@ fn main() -> std::io::Result<()> {
     let file_name = &args[1];
 
     let mut vector: Vec<String> = Vec::new();
-    println!("File name: {file_name}");
 
     let bin_instructions = read_bin(file_name)?;
 
