@@ -1,7 +1,9 @@
 use lazy_static::lazy_static;
 use std::collections::HashMap;
-use std::fs;
+use std::fs::File;
+use std::io::Write;
 use std::io::{Cursor, Read};
+use std::{fs, vec};
 
 const WORD_BYTE: u8 = 0b00000001;
 const BYTE_BYTE: u8 = 0b00000000;
@@ -17,14 +19,13 @@ lazy_static! {
         m.insert(0b00101000, "CH");
         m.insert(0b00110000, "DH");
         m.insert(0b00111000, "BH");
-        m.insert(0b00000000, "AL");
         m.insert(0b00000001, "CL");
         m.insert(0b00000010, "DL");
         m.insert(0b00000011, "BL");
         m.insert(0b00000100, "AH");
         m.insert(0b00000101, "CH");
-        m.insert(0b00110110, "DH");
-        m.insert(0b00110111, "BH");
+        m.insert(0b00000110, "DH");
+        m.insert(0b00000111, "BH");
 
         m
     };
@@ -38,12 +39,11 @@ lazy_static! {
         m.insert(0b00101000, "BP");
         m.insert(0b00110000, "SI");
         m.insert(0b00111000, "DI");
-        m.insert(0b00000000, "AX");
         m.insert(0b00000001, "CX");
         m.insert(0b00000010, "DX");
         m.insert(0b00000011, "BX");
         m.insert(0b00000100, "SP");
-        m.insert(0b00100101, "BP");
+        m.insert(0b00000101, "BP");
         m.insert(0b00000110, "SI");
         m.insert(0b00000111, "DI");
 
@@ -119,12 +119,24 @@ fn decode(operation: u8, direction: u8, word: u8, mode: u8, reg1: u8, reg2: u8) 
     format!("MOV {dest},{src}")
 }
 
+fn write_file(content: Vec<String>) -> std::io::Result<()> {
+    let mut buffer = File::create("result.asm").expect("File not created");
+    for w in &content {
+        match write!(buffer, "{}", w) {
+            Ok(()) => {}
+            Err(_) => {}
+        }
+    }
+    Ok(())
+}
+
 /// Running the code in dev mode:
 /// `cargo run -- <file_name>`
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = std::env::args().collect();
     let file_name = &args[1];
 
+    let mut vector: Vec<String> = Vec::new();
     println!("File name: {file_name}");
 
     let bin_instructions = read_bin(file_name)?;
@@ -141,8 +153,12 @@ fn main() -> std::io::Result<()> {
 
         let decoded_instruction = decode(operation, direction, word, mode, reg1, reg2);
 
-        println!("{decoded_instruction}");
+        // vector.push(decoded_instruction);
+
+        println!("{decoded_instruction}")
     }
+
+    // write_file(vector).expect("Error in writing file.");
 
     Ok(())
 }
