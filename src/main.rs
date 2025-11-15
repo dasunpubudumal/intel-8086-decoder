@@ -1,9 +1,9 @@
 use lazy_static::lazy_static;
 use std::collections::HashMap;
+use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::io::{Cursor, Read};
-use std::{fs, vec};
 
 const WORD_BYTE: u8 = 0b00000001;
 const BYTE_BYTE: u8 = 0b00000000;
@@ -121,17 +121,6 @@ fn decode(operation: u8, direction: u8, word: u8, mode: u8, reg1: u8, reg2: u8) 
         // Unknown value!
     }
     format!("mov {dest},{src}")
-}
-
-fn write_file_from_vector(content: Vec<String>) -> std::io::Result<()> {
-    let mut buffer = File::create("result.asm").expect("File not created");
-    for w in &content {
-        match write!(buffer, "{}", w) {
-            Ok(()) => {}
-            Err(_) => {}
-        }
-    }
-    Ok(())
 }
 
 fn write_file_from_string(content: &str) -> std::io::Result<()> {
