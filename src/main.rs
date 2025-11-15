@@ -13,21 +13,21 @@ lazy_static! {
     // This is when the register is a byte register (not a word register.)
     static ref BYTE_MAP_REG: HashMap<u8, &'static str> = {
         let mut m = HashMap::new();
-        m.insert(0b00000000, "AL");
-        m.insert(0b00001000, "CL");
-        m.insert(0b00010000, "DL");
-        m.insert(0b00011000, "BL");
-        m.insert(0b00100000, "AH");
-        m.insert(0b00101000, "CH");
-        m.insert(0b00110000, "DH");
-        m.insert(0b00111000, "BH");
-        m.insert(0b00000001, "CL");
-        m.insert(0b00000010, "DL");
-        m.insert(0b00000011, "BL");
-        m.insert(0b00000100, "AH");
-        m.insert(0b00000101, "CH");
-        m.insert(0b00000110, "DH");
-        m.insert(0b00000111, "BH");
+        m.insert(0b00000000, "al");
+        m.insert(0b00001000, "cl");
+        m.insert(0b00010000, "dl");
+        m.insert(0b00011000, "bl");
+        m.insert(0b00100000, "ah");
+        m.insert(0b00101000, "ch");
+        m.insert(0b00110000, "dh");
+        m.insert(0b00111000, "bh");
+        m.insert(0b00000001, "cl");
+        m.insert(0b00000010, "dl");
+        m.insert(0b00000011, "bl");
+        m.insert(0b00000100, "ah");
+        m.insert(0b00000101, "ch");
+        m.insert(0b00000110, "dh");
+        m.insert(0b00000111, "bh");
 
         m
     };
@@ -35,21 +35,21 @@ lazy_static! {
     // This is when the register is a word register (not a byte register)
     static ref WORD_MAP_REG: HashMap<u8, &'static str> = {
         let mut m = HashMap::new();
-        m.insert(0b00000000, "AX");
-        m.insert(0b00001000, "CX");
-        m.insert(0b00010000, "DX");
-        m.insert(0b00011000, "BX");
-        m.insert(0b00100000, "SP");
-        m.insert(0b00101000, "BP");
-        m.insert(0b00110000, "SI");
-        m.insert(0b00111000, "DI");
-        m.insert(0b00000001, "CX");
-        m.insert(0b00000010, "DX");
-        m.insert(0b00000011, "BX");
-        m.insert(0b00000100, "SP");
-        m.insert(0b00000101, "BP");
-        m.insert(0b00000110, "SI");
-        m.insert(0b00000111, "DI");
+        m.insert(0b00000000, "ax");
+        m.insert(0b00001000, "cx");
+        m.insert(0b00010000, "dx");
+        m.insert(0b00011000, "bx");
+        m.insert(0b00100000, "sp");
+        m.insert(0b00101000, "bp");
+        m.insert(0b00110000, "si");
+        m.insert(0b00111000, "di");
+        m.insert(0b00000001, "cx");
+        m.insert(0b00000010, "dx");
+        m.insert(0b00000011, "bx");
+        m.insert(0b00000100, "sp");
+        m.insert(0b00000101, "bp");
+        m.insert(0b00000110, "si");
+        m.insert(0b00000111, "di");
 
         m
     };
@@ -120,7 +120,7 @@ fn decode(operation: u8, direction: u8, word: u8, mode: u8, reg1: u8, reg2: u8) 
     } else {
         // Unknown value!
     }
-    format!("MOV {dest},{src}")
+    format!("mov {dest},{src}")
 }
 
 fn write_file_from_vector(content: Vec<String>) -> std::io::Result<()> {
@@ -170,7 +170,7 @@ fn main() -> std::io::Result<()> {
 
     // TODO: It would be more performant if the tables are stored in lowercase and MOV is also made
     // lowercase.
-    write_file_from_string(output_string.to_lowercase().as_str()).expect("Error in writing file.");
+    write_file_from_string(output_string.as_str()).expect("Error in writing file.");
 
     Ok(())
 }
