@@ -123,7 +123,7 @@ fn decode(operation: u8, direction: u8, word: u8, mode: u8, reg1: u8, reg2: u8) 
     format!("MOV {dest},{src}")
 }
 
-fn write_file(content: Vec<String>) -> std::io::Result<()> {
+fn write_file_from_vector(content: Vec<String>) -> std::io::Result<()> {
     let mut buffer = File::create("result.asm").expect("File not created");
     for w in &content {
         match write!(buffer, "{}", w) {
@@ -134,15 +134,26 @@ fn write_file(content: Vec<String>) -> std::io::Result<()> {
     Ok(())
 }
 
+fn write_file_from_string(content: &str) -> std::io::Result<()> {
+    let mut buffer = File::create("result.asm").expect("File not created.");
+    match write!(buffer, "{}", content) {
+        Ok(()) => return Ok(()),
+        Err(_) => {}
+    }
+    Ok(())
+}
+
 /// Running the code in dev mode:
 /// `cargo run -- <file_name>`
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = std::env::args().collect();
     let file_name = &args[1];
 
+    let mut output_string = String::from("bits 16;\n");
+
     let mut vector: Vec<String> = Vec::new();
 
-    let bin_instructions = read_bin(file_name)?;
+    let bin_instructions = read_bin(&file_name)?;
 
     for bin_instruction in bin_instructions {
         // These are 16-bit values.
@@ -154,12 +165,12 @@ fn main() -> std::io::Result<()> {
         let reg1 = (bin_instruction & 0b0000000000111000) as u8;
         let reg2 = (bin_instruction & 0b0000000000000111) as u8;
 
-        let decoded_instruction = decode(operation, direction, word, mode, reg1, reg2);
+        let decoded_instruction = decode(operation, direction, word, mode, reg2, reg2);
 
-        vector.push(format!("{}\n", decoded_instruction));
+        output_string.push_str(format!("{decoded_instruction}\n").as_str());
     }
 
-    write_file(vector).expect("Error in writing file.");
+    write_file_from_string(output_string.as_str()).expect("Error in writing file.");
 
     Ok(())
 }
