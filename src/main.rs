@@ -152,7 +152,7 @@ fn main() -> std::io::Result<()> {
         let reg1 = (bin_instruction & 0b0000000000111000) as u8;
         let reg2 = (bin_instruction & 0b0000000000000111) as u8;
 
-        let decoded_instruction = decode(operation, direction, word, mode, reg2, reg2);
+        let decoded_instruction = decode(operation, direction, word, mode, reg1, reg2);
 
         output_string.push_str(format!("{decoded_instruction}\n").as_str());
     }
