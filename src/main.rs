@@ -151,8 +151,6 @@ fn main() -> std::io::Result<()> {
 
     let mut output_string = String::from("bits 16;\n");
 
-    let mut vector: Vec<String> = Vec::new();
-
     let bin_instructions = read_bin(&file_name)?;
 
     for bin_instruction in bin_instructions {
@@ -170,7 +168,7 @@ fn main() -> std::io::Result<()> {
         output_string.push_str(format!("{decoded_instruction}\n").as_str());
     }
 
-    write_file_from_string(output_string.as_str()).expect("Error in writing file.");
+    write_file_from_string(output_string.to_lowercase().as_str()).expect("Error in writing file.");
 
     Ok(())
 }
