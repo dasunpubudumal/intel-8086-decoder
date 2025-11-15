@@ -168,6 +168,8 @@ fn main() -> std::io::Result<()> {
         output_string.push_str(format!("{decoded_instruction}\n").as_str());
     }
 
+    // TODO: It would be more performant if the tables are stored in lowercase and MOV is also made
+    // lowercase.
     write_file_from_string(output_string.to_lowercase().as_str()).expect("Error in writing file.");
 
     Ok(())
