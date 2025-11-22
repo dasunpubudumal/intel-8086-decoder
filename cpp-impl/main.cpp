@@ -87,8 +87,14 @@ std::string decode(int16_t instruction) {
   return std::format("mov {}, {}", dst, src);
 }
 
-int main() {
-  std::ifstream infile("listing_0037_single_register_mov", std::ios::binary);
+int main(int argc, const char *argv[]) {
+
+  const char *fileNamePtr = argv[1];
+  std::string fileName(fileNamePtr);
+
+  std::cout << "File name: " << fileName << "\n";
+
+  std::ifstream infile(fileName, std::ios::binary);
   std::ofstream outfile("cppout.asm");
 
   if (!infile) {
