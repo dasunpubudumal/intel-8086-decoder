@@ -1,3 +1,5 @@
+build: rust-build cpp-build
+
 rust-build:
 	cargo build
 
