@@ -138,7 +138,7 @@ fn main() -> std::io::Result<()> {
     let args: Vec<String> = std::env::args().collect();
     let file_name = &args[1];
 
-    let mut output_string = String::from("bits 16;\n");
+    let mut output_string = String::from("bits 16;\n\n");
 
     let bin_instructions = read_bin(&file_name)?;
 
