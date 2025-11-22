@@ -2,4 +2,4 @@
 
 # Intel 8086 Decoder 
 
-This is my implementation(s) for following the course "Performance Aware Programming."
+This is my implementation(s) for following the course "Performance Aware Programming.". It is a **work in progress**.
