@@ -89,10 +89,14 @@ std::string decode(int16_t instruction) {
 
 int main() {
   std::ifstream infile("listing_0037_single_register_mov", std::ios::binary);
+  std::ofstream outfile("cppout.asm");
+
   if (!infile) {
     std::cerr << "Failed to open file\n";
     return 1;
   }
+
+  std::string out = "bits 16;\n";
 
   while (true) {
     uint8_t lo, hi;
@@ -109,10 +113,13 @@ int main() {
 
     std::string decoded = decode(instr);
 
-    std::cout << std::format("Decoded instruction: {}\n", decoded);
-
-    // Print binary string (16 bits)
-    std::cout << std::bitset<16>(instr).to_string() << "\n";
+    out.append(std::format("{}\n", decoded));
   }
+
+  if (outfile.is_open()) {
+    outfile << out;
+    outfile.close();
+  }
+
   return 0;
 }
