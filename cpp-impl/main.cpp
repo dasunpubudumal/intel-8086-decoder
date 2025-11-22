@@ -1,4 +1,3 @@
-#include <bitset>
 #include <cstdint>
 #include <format>
 #include <fstream>
