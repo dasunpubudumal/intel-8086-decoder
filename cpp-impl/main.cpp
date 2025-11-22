@@ -37,8 +37,6 @@ std::vector<int16_t> read_file(const std::string &file_name) {
     throw std::runtime_error("Failed to open file: " + file_name);
   }
 
-  Table wordTable;
-
   // find file size
   infile.seekg(0, std::ios::end);
   std::streamsize size = infile.tellg();
